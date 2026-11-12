@@ -3,6 +3,10 @@
     "private": true,
     "name": "larch",
     "type": "module",
+    "engines": {
+        "node": ">=22.13.0",
+        "pnpm": ">=12"
+    },
     "scripts": {
         "build": "vite build",
         "dev": "vite",

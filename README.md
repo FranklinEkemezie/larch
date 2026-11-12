@@ -1,58 +1,76 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Larch
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A quiet, offline-first progress tracker for entries and entry groups.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+| Area | Technology |
+| --- | --- |
+| Backend | Laravel 13.40, PHP 8.5 |
+| Mobile runtime | NativePHP Mobile 4.7 (Android) |
+| Frontend | Inertia.js 3.7, React 19.3, TypeScript 6.0 |
+| Styling | Tailwind CSS 4.3, shadcn/ui, Lucide React, Inter Variable |
+| Build | Vite 8.3, pnpm 12.18 |
+| Database | SQLite |
+| Tests | Pest 5.3, PHPUnit 13, Vitest 5, Testing Library |
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requirements
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP 8.5.x
+- Composer 2.8+
+- Node.js 22.21.1 LTS
+- pnpm 12.x
+- Android SDK for native builds: platform 36, build-tools 36, platform-tools,
+  NDK 27.0.12077973, CMake 3.22.1 (see **Android build** below)
 
-## Learning Laravel
+## Setup
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
-
-```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+```sh
+composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate
+pnpm install
+pnpm build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+The SQLite database is created at `database/database.sqlite`.
 
-## Contributing
+## Development
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```sh
+php artisan serve
+pnpm dev
+```
 
-## Code of Conduct
+## Tests
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```sh
+php artisan test      # Pest
+pnpm test             # Vitest
+pnpm typecheck        # TypeScript
+```
 
-## Security Vulnerabilities
+## Android build
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+NativePHP regenerates the `nativephp/` directory, so it is not tracked by Git.
+The Android SDK location is read from `NATIVEPHP_ANDROID_SDK_LOCATION` in
+`.env` (currently `C:\Android\Sdk`).
 
-## License
+Required Android SDK packages:
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```sh
+sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" \
+  "ndk;27.0.12077973" "cmake;3.22.1"
+```
+
+Build and run on a connected device or emulator:
+
+```sh
+php artisan native:install
+php artisan native:run android
+```
+
+> The Android platform, build-tools, platform-tools, and NDK downloads are
+> currently deferred. Everything needed for the Laravel + Inertia web
+> application is installed and passing.
