@@ -43,6 +43,32 @@ php artisan serve
 pnpm dev
 ```
 
+### Testing on a phone with Jump
+
+`native:jump` starts the Laravel server, the QR code, and the phone bridge, but
+it does **not** start Vite. If Vite is not running, the app falls back to the
+built assets in `public/build`, so frontend edits never appear.
+
+Start both together:
+
+```sh
+pnpm dev:mobile
+```
+
+This starts Vite, waits for `public/hot`, then starts `php artisan native:jump`
+with any extra arguments (for example `pnpm dev:mobile -- --browser`).
+
+Scan the QR code with the Jump app on your phone, on the same Wi-Fi network as
+the computer. If the app was already open, reload it once after connecting so
+it picks up the Vite client — after that, edits hot-reload automatically.
+
+To run them separately, start Vite **first**:
+
+```sh
+pnpm dev
+php artisan native:jump
+```
+
 ## Tests
 
 ```sh

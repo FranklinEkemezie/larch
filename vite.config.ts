@@ -15,6 +15,10 @@ export default defineConfig({
         inertia(),
     ],
     server: {
+        // Bind IPv4 explicitly. NativePHP Jump reads `public/hot` and rewrites
+        // the dev-server origin; an IPv6 origin ([::1]) is mangled into a
+        // broken relative asset URL, so the phone 404s on /@vite/client.
+        host: '127.0.0.1',
         watch: {
             ignored: ['**/storage/framework/views/**'],
         },
