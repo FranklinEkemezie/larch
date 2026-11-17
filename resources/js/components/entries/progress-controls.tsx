@@ -1,46 +1,43 @@
 import { useEffect, useState } from 'react';
-import { Check, Minus, Plus } from 'lucide-react';
+import { Check } from 'lucide-react';
 import { ProgressBar } from '@/components/common/progress-bar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAppData } from '@/data/store';
+import { useProgressUpdate } from '@/hooks/use-progress-update';
 import { entryPercent, entryStatus } from '@/lib/progress';
 import type { Entry } from '@/types';
 
 export function ProgressControls({ entry }: { entry: Entry }) {
-    const { setEntryProgress } = useAppData();
+    const { value, saving, update, increment, decrement } =
+        useProgressUpdate(entry);
     const [exact, setExact] = useState(String(entry.completed));
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        setExact(String(entry.completed));
-        setError(null);
-    }, [entry.completed]);
+        setExact(String(value));
+    }, [value]);
 
-    const percent = entryPercent(entry);
-    const status = entryStatus(entry);
-
-    const decrement = () => setEntryProgress(entry.id, entry.completed - 1);
-    const increment = () => setEntryProgress(entry.id, entry.completed + 1);
+    const percent = entryPercent({ completed: value, total: entry.total });
+    const status = entryStatus({ completed: value, total: entry.total });
 
     const applyExact = (event: React.FormEvent) => {
         event.preventDefault();
 
-        const value = Number(exact);
+        const next = Number(exact);
 
-        if (!Number.isInteger(value)) {
+        if (!Number.isInteger(next)) {
             setError('Enter a whole number.');
             return;
         }
 
-        if (value < 0 || value > entry.total) {
+        if (next < 0 || next > entry.total) {
             setError(`Enter a value between 0 and ${entry.total}.`);
             return;
         }
 
         setError(null);
-        setEntryProgress(entry.id, value);
+        update(next);
     };
 
     return (
@@ -51,7 +48,7 @@ export function ProgressControls({ entry }: { entry: Entry }) {
                     <p className="text-muted-foreground text-xs">
                         {status === 'completed'
                             ? 'Everything is complete.'
-                            : `Keep going — ${entry.total - entry.completed} ${entry.unit.toLowerCase()} to go.`}
+                            : `${entry.total - value} ${entry.unit.toLowerCase()} to go.`}
                     </p>
                 </div>
                 <span className="text-2xl font-semibold tabular-nums">
@@ -72,15 +69,15 @@ export function ProgressControls({ entry }: { entry: Entry }) {
                     size="icon-lg"
                     className="size-12 rounded-full"
                     aria-label={`Decrease completed ${entry.unit}`}
-                    disabled={entry.completed <= 0}
+                    disabled={saving || value <= 0}
                     onClick={decrement}
                 >
-                    <Minus className="size-5" />
+                    <span className="text-lg">−</span>
                 </Button>
 
                 <div className="text-center">
                     <div className="text-3xl font-semibold tabular-nums">
-                        {entry.completed}
+                        {value}
                     </div>
                     <div className="text-muted-foreground text-xs">
                         of {entry.total} {entry.unit.toLowerCase()}
@@ -92,10 +89,10 @@ export function ProgressControls({ entry }: { entry: Entry }) {
                     size="icon-lg"
                     className="size-12 rounded-full"
                     aria-label={`Increase completed ${entry.unit}`}
-                    disabled={entry.completed >= entry.total}
+                    disabled={saving || value >= entry.total}
                     onClick={increment}
                 >
-                    <Plus className="size-5" />
+                    <span className="text-lg">+</span>
                 </Button>
             </div>
 
@@ -122,7 +119,7 @@ export function ProgressControls({ entry }: { entry: Entry }) {
                         onChange={(event) => setExact(event.target.value)}
                         className="w-24"
                     />
-                    <Button type="submit" variant="secondary">
+                    <Button type="submit" variant="secondary" disabled={saving}>
                         Apply
                     </Button>
                 </div>

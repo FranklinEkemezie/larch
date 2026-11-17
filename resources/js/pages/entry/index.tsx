@@ -1,72 +1,184 @@
-import type {Entry} from "@/types.ts";
-import {Button} from "@/components/ui/button.tsx";
-import {ArrowUpRightFromSquareIcon, PencilIcon, TrashIcon} from "lucide-react";
-import {Link} from "@inertiajs/react";
-import {LinkButton} from "@/components/shared/link-button.tsx";
+import { useMemo, useState } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import { ListChecks, Plus, SearchX } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
+import { SearchInput } from '@/components/common/search-input';
+import { EntryCard } from '@/components/entries/entry-card';
+import { AppLayout } from '@/components/layout/app-layout';
+import { PageHeader } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { filterAndSortEntries } from '@/lib/entry-query';
+import { routes } from '@/lib/routes';
+import type { EntryFilter, EntryIndexProps, EntrySort } from '@/types';
+import { cn } from 'cn';
 
+const filters: { value: EntryFilter; label: string }[] = [
+    { value: 'all', label: 'All' },
+    { value: 'not-started', label: 'Not started' },
+    { value: 'in-progress', label: 'In progress' },
+    { value: 'completed', label: 'Completed' },
+];
 
-type IndexProps = {
-    entries: Entry[]
-}
+const sortOptions: { value: EntrySort; label: string }[] = [
+    { value: 'newest', label: 'Newest first' },
+    { value: 'oldest', label: 'Oldest first' },
+    { value: 'title-asc', label: 'Title A–Z' },
+    { value: 'title-desc', label: 'Title Z–A' },
+    { value: 'progress-asc', label: 'Progress: low to high' },
+    { value: 'progress-desc', label: 'Progress: high to low' },
+];
 
-export default function Index({ entries }: IndexProps) {
+export default function EntriesIndex({ entries }: EntryIndexProps) {
+    const [search, setSearch] = useState('');
+    const debouncedSearch = useDebouncedValue(search);
+    const [filter, setFilter] = useState<EntryFilter>('all');
+    const [sort, setSort] = useState<EntrySort>('newest');
+
+    const visibleEntries = useMemo(
+        () =>
+            filterAndSortEntries(entries, {
+                search: debouncedSearch,
+                filter,
+                sort,
+            }),
+        [entries, debouncedSearch, filter, sort],
+    );
 
     return (
-        <div>
+        <AppLayout>
+            <Head title="Entries" />
 
-            <h1>My Entries</h1>
+            <PageHeader
+                title="Entries"
+                description={
+                    entries.length === 0
+                        ? 'Track books, courses and anything measured in units.'
+                        : `${entries.length} ${
+                              entries.length === 1 ? 'entry' : 'entries'
+                          } tracked`
+                }
+                actions={
+                    <Button asChild size="icon" aria-label="New entry">
+                        <Link href={routes.entries.create}>
+                            <Plus />
+                        </Link>
+                    </Button>
+                }
+            />
 
-            <Button>
-                <Link href="/entries/create">Add Entry</Link>
-            </Button>
-            <div>
+            {entries.length === 0 ? (
+                <EmptyState
+                    icon={ListChecks}
+                    title="No entries yet"
+                    description="Add the first thing you are working through and keep its progress in one place."
+                    action={
+                        <Button asChild>
+                            <Link href={routes.entries.create}>
+                                <Plus />
+                                Create entry
+                            </Link>
+                        </Button>
+                    }
+                />
+            ) : (
+                <div className="space-y-4">
+                    <SearchInput
+                        value={search}
+                        onValueChange={setSearch}
+                        placeholder="Search entries…"
+                        aria-label="Search entries"
+                    />
 
-                <table>
-                    <thead>
-                        <tr>
-                            <th>S/N</th>
-                            <th>Title</th>
-                            <th>Unit</th>
-                            <th>Completed</th>
-                            <th>Total</th>
-                            <th>Progress</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {entries.map(({ id, title, completed, total, unit }, index) => (
-                            <tr key={id}>
-                                <th>{index + 1}</th>
-                                <td>{title}</td>
-                                <td>{unit}</td>
-                                <td>{completed}</td>
-                                <td>{total}</td>
-                                <td>
-                                    {(completed / total * 100).toFixed(2)}%
-                                    <progress value={completed} max={total}></progress>
-                                </td>
-                                <td>
-                                    <div>
-                                        <LinkButton href={`/entries/${id}`}>
-                                            <ArrowUpRightFromSquareIcon />
-                                            View
-                                        </LinkButton>
-                                        <LinkButton href={`/entries/${id}/edit`}>
-                                            <PencilIcon />
-                                            Edit
-                                        </LinkButton>
-                                        <LinkButton method="delete" href={`/entries/${id}`} variant="destructive">
-                                            <TrashIcon />
-                                            Delete
-                                        </LinkButton>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                    <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+                        {filters.map((option) => {
+                            const active = filter === option.value;
 
-        </div>
-    )
+                            return (
+                                <Button
+                                    key={option.value}
+                                    type="button"
+                                    size="sm"
+                                    variant={active ? 'default' : 'outline'}
+                                    aria-pressed={active}
+                                    className={cn(
+                                        'shrink-0 rounded-full',
+                                        !active && 'bg-background',
+                                    )}
+                                    onClick={() => setFilter(option.value)}
+                                >
+                                    {option.label}
+                                </Button>
+                            );
+                        })}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3">
+                        <p className="text-muted-foreground text-xs">
+                            {visibleEntries.length}{' '}
+                            {visibleEntries.length === 1 ? 'result' : 'results'}
+                        </p>
+                        <Select
+                            value={sort}
+                            onValueChange={(value) => setSort(value as EntrySort)}
+                        >
+                            <SelectTrigger
+                                size="sm"
+                                aria-label="Sort entries"
+                                className="w-auto gap-1.5"
+                            >
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent align="end">
+                                {sortOptions.map((option) => (
+                                    <SelectItem
+                                        key={option.value}
+                                        value={option.value}
+                                    >
+                                        {option.label}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+
+                    {visibleEntries.length === 0 ? (
+                        <EmptyState
+                            icon={SearchX}
+                            title="No matching entries"
+                            description={
+                                debouncedSearch !== ''
+                                    ? `Nothing matches “${debouncedSearch}”.`
+                                    : 'No entries match this filter.'
+                            }
+                            action={
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setSearch('');
+                                        setFilter('all');
+                                    }}
+                                >
+                                    Clear filters
+                                </Button>
+                            }
+                        />
+                    ) : (
+                        <div className="space-y-2.5">
+                            {visibleEntries.map((entry) => (
+                                <EntryCard key={entry.id} entry={entry} />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </AppLayout>
+    );
 }
