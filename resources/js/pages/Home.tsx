@@ -1,4 +1,5 @@
 import { ArrowRight, Sprout } from 'lucide-react';
+// import { ArrowRight, Sprout } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export default function Home() {
@@ -19,7 +20,7 @@ export default function Home() {
                         Personal progress tracker
                     </p>
                     <h1 className="text-4xl font-semibold tracking-tight">
-                        Larch
+                        Hello
                     </h1>
                     <p className="text-muted-foreground text-balance">
                         A quiet place to track the work that matters — one
