@@ -1,87 +1,23 @@
-import {Link, useForm} from "@inertiajs/react";
-import type {SubmitEventHandler} from "react";
-import {Label} from "@/components/ui/label.tsx";
-import {Input} from "@/components/ui/input.tsx";
-import {Button} from "@/components/ui/button.tsx";
+import { Head } from '@inertiajs/react';
+import { OnboardingForm } from '@/components/auth/onboarding-form';
+import { RegisterForm } from '@/components/auth/register-form';
+import { isNativeApp } from '@/lib/platform';
+import { AuthLayout } from '@/layouts/auth-layout';
 
 export default function Register() {
-
-    const { data, setData, post, processing, errors } = useForm({
-        name: '',
-        email: '',
-        password: '',
-        password_confirmation: '',
-    });
-
-    const handleSubmit: SubmitEventHandler = (e) => {
-        e.preventDefault();
-
-        post('/signup', {
-
-            onError: () => {
-
-                alert('Failed to register');
-            }
-        });
-
-    }
+    const native = isNativeApp();
 
     return (
-        <div>
-
-            <h1>Register</h1>
-
-            <form action="" onSubmit={handleSubmit}>
-
-
-                <div>
-                    <Label>Name</Label>
-                    <Input
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                    />
-                    <div className="text-destructive">{errors.name}</div>
-                </div>
-
-
-                <div>
-                    <Label>Email</Label>
-                    <Input
-                        type="email"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-                    <div className="text-destructive">{errors.email}</div>
-                </div>
-
-                <div>
-                    <Label>Password</Label>
-                    <Input
-                        type="password"
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-                    <div className="text-destructive">{errors.password}</div>
-                </div>
-
-                <div>
-                    <Label>Confirm Password</Label>
-                    <Input
-                        type="password"
-                        value={data.password_confirmation}
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                    />
-                    <div className="text-destructive">{errors.password_confirmation}</div>
-                </div>
-
-                <div>
-                    <Button type="submit" disabled={processing}>Submit</Button>
-
-                    <div>Already have an account? <Link href='/login'>Login</Link></div>
-                </div>
-            </form>
-
-
-        </div>
-    )
+        <AuthLayout
+            title={native ? 'Set up Larch' : 'Create your account'}
+            description={
+                native
+                    ? 'Your tracker stays on this device.'
+                    : undefined
+            }
+        >
+            <Head title="Create account" />
+            {native ? <OnboardingForm /> : <RegisterForm />}
+        </AuthLayout>
+    );
 }
