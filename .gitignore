@@ -28,3 +28,8 @@ Thumbs.db
 
 /database/*.sqlite
 /database/*.sqlite-journal
+
+# Wayfinder generated helpers
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
