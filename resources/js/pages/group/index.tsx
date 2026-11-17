@@ -1,63 +1,96 @@
-import { Button } from "@/components/ui/button";
-import type {Group} from "@/types.ts";
-import {Link} from "@inertiajs/react";
-import {ArrowUpRightFromSquareIcon, PencilIcon, TrashIcon} from "lucide-react";
+import { useMemo, useState } from 'react';
+import { Head, Link } from '@inertiajs/react';
+import { FolderPlus, FolderTree, SearchX } from 'lucide-react';
+import { EmptyState } from '@/components/common/empty-state';
+import { SearchInput } from '@/components/common/search-input';
+import { GroupCard } from '@/components/groups/group-card';
+import { AppLayout } from '@/components/layout/app-layout';
+import { PageHeader } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import { routes } from '@/lib/routes';
+import type { GroupIndexProps } from '@/types';
 
-type IndexProps = {
-    groups: Group[]
-}
+export default function GroupsIndex({ groups }: GroupIndexProps) {
+    const [search, setSearch] = useState('');
+    const debouncedSearch = useDebouncedValue(search);
 
-export default function Index({ groups }: IndexProps) {
+    const visibleGroups = useMemo(() => {
+        const needle = debouncedSearch.trim().toLowerCase();
+
+        return groups.filter((group) =>
+            needle === '' ? true : group.name.toLowerCase().includes(needle),
+        );
+    }, [groups, debouncedSearch]);
 
     return (
-        <div>
+        <AppLayout>
+            <Head title="Groups" />
 
-            <h1>My Groups</h1>
+            <PageHeader
+                title="Groups"
+                description={
+                    groups.length === 0
+                        ? 'Bring related entries together without duplicating progress.'
+                        : `${groups.length} ${
+                              groups.length === 1 ? 'group' : 'groups'
+                          }`
+                }
+                actions={
+                    <Button asChild size="icon" aria-label="New group">
+                        <Link href={routes.groups.create}>
+                            <FolderPlus />
+                        </Link>
+                    </Button>
+                }
+            />
 
-            <Button>
-                <Link href="/groups/create">Create Group</Link>
-            </Button>
+            {groups.length === 0 ? (
+                <EmptyState
+                    icon={FolderTree}
+                    title="No groups yet"
+                    description="Group entries by semester, learning path, project or any plan you want to follow."
+                    action={
+                        <Button asChild>
+                            <Link href={routes.groups.create}>
+                                <FolderPlus />
+                                Create group
+                            </Link>
+                        </Button>
+                    }
+                />
+            ) : (
+                <div className="space-y-4">
+                    <SearchInput
+                        value={search}
+                        onValueChange={setSearch}
+                        placeholder="Search groups…"
+                        aria-label="Search groups"
+                    />
 
-            <div>
-
-                {groups.map(({ id, name, entries }) => (
-                    <div key={id}>
-                        <div>
-                            <strong>Name:</strong>
-                            {name}
+                    {visibleGroups.length === 0 ? (
+                        <EmptyState
+                            icon={SearchX}
+                            title="No matching groups"
+                            description={`Nothing matches “${debouncedSearch}”.`}
+                            action={
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setSearch('')}
+                                >
+                                    Clear search
+                                </Button>
+                            }
+                        />
+                    ) : (
+                        <div className="space-y-2.5">
+                            {visibleGroups.map((group) => (
+                                <GroupCard key={group.id} group={group} />
+                            ))}
                         </div>
-
-                        <div>
-                            <strong>Number of Entries:</strong>
-                            {entries.length}
-                        </div>
-
-                        <hr/>
-
-                        <Button asChild={true}>
-                            <Link href={`/groups/${id}`}>
-                                <ArrowUpRightFromSquareIcon />
-                                View
-                            </Link>
-                        </Button>
-
-                        <Button asChild={true}>
-                            <Link href={`/groups/${id}/edit`}>
-                                <PencilIcon />
-                                Edit
-                            </Link>
-                        </Button>
-
-                        <Button variant="destructive" asChild={true}>
-                            <Link method="delete" href={`/groups/${id}`}>
-                                <TrashIcon />
-                                Delete
-                            </Link>
-                        </Button>
-                    </div>
-                ))}
-
-            </div>
-        </div>
-    )
+                    )}
+                </div>
+            )}
+        </AppLayout>
+    );
 }

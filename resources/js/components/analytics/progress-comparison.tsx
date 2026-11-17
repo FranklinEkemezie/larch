@@ -1,7 +1,8 @@
+import { Link } from '@inertiajs/react';
 import { Check, Info } from 'lucide-react';
 import { ProgressBar } from '@/components/common/progress-bar';
+import { routes } from '@/lib/routes';
 import { entryPercent, isEntryComplete } from '@/lib/progress';
-import { navigate } from '@/lib/router';
 import type { Entry } from '@/types';
 
 /**
@@ -47,13 +48,10 @@ export function ProgressComparison({ entries }: { entries: Entry[] }) {
                     const percent = entryPercent(entry);
 
                     return (
-                        <button
+                        <Link
                             key={entry.id}
-                            type="button"
-                            onClick={() =>
-                                navigate({ name: 'entry', id: entry.id })
-                            }
-                            className="focus-visible:ring-ring/50 group block w-full rounded-md text-left focus-visible:ring-[3px] focus-visible:outline-none"
+                            href={routes.entries.show(entry.id)}
+                            className="focus-visible:ring-ring/50 group block rounded-md focus-visible:ring-[3px] focus-visible:outline-none"
                         >
                             <div className="flex items-baseline justify-between gap-3">
                                 <span className="truncate text-sm font-medium group-hover:underline group-hover:underline-offset-4">
@@ -71,7 +69,7 @@ export function ProgressComparison({ entries }: { entries: Entry[] }) {
                             <div className="text-muted-foreground mt-1 text-xs tabular-nums">
                                 {entry.completed} / {entry.total} {entry.unit}
                             </div>
-                        </button>
+                        </Link>
                     );
                 })}
             </div>

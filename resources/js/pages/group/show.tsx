@@ -1,74 +1,139 @@
-import type {Group} from "@/types.ts";
-import {ArrowLeftIcon, PencilIcon, TrashIcon} from "lucide-react";
-import {LinkButton} from "@/components/shared/link-button.tsx";
-import {Button} from "@/components/ui/button.tsx";
-import {Link} from "@inertiajs/react";
+import { useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import {
+    FolderPlus,
+    ListPlus,
+    Pencil,
+    Trash2,
+} from 'lucide-react';
+import { ProgressComparison } from '@/components/analytics/progress-comparison';
+import { ConfirmDialog } from '@/components/common/confirm-dialog';
+import { EmptyState } from '@/components/common/empty-state';
+import { GroupEntryRow } from '@/components/groups/group-entry-row';
+import { AppLayout } from '@/components/layout/app-layout';
+import { PageHeader } from '@/components/layout/page-header';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/toast';
+import { routes } from '@/lib/routes';
+import type { GroupShowProps } from '@/types';
 
-type ShowProps = {
-    group: Group
-}
+export default function ShowGroup({ group }: GroupShowProps) {
+    const { toast } = useToast();
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [removingId, setRemovingId] = useState<string | null>(null);
 
-export default function Show({ group }: ShowProps) {
+    const removeEntry = (entryId: string) => {
+        const remaining = group.entries
+            .filter((entry) => entry.id !== entryId)
+            .map((entry) => entry.id);
+
+        setRemovingId(entryId);
+
+        router.put(
+            routes.groups.update(group.id),
+            { name: group.name, entries: remaining },
+            {
+                preserveScroll: true,
+                onSuccess: () =>
+                    toast({ title: 'Entry removed from group' }),
+                onFinish: () => setRemovingId(null),
+            },
+        );
+    };
 
     return (
-        <div>
+        <AppLayout>
+            <Head title={group.name} />
 
-            <div>
-                <LinkButton href="/groups">
-                    <ArrowLeftIcon />
-                    Back to Groups
-                </LinkButton>
+            <PageHeader
+                title={group.name}
+                description={`${group.entries.length} ${
+                    group.entries.length === 1 ? 'entry' : 'entries'
+                }`}
+                backHref={routes.groups.index}
+                actions={
+                    <>
+                        <Button asChild variant="ghost" size="icon">
+                            <Link
+                                href={routes.groups.edit(group.id)}
+                                aria-label="Edit group"
+                            >
+                                <Pencil />
+                            </Link>
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            aria-label="Delete group"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() => setDeleteOpen(true)}
+                        >
+                            <Trash2 />
+                        </Button>
+                    </>
+                }
+            />
 
+            <div className="mb-5 flex flex-wrap gap-2">
+                <Button asChild variant="outline" size="sm">
+                    <Link href={routes.groups.edit(group.id)}>
+                        <ListPlus />
+                        Manage entries
+                    </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                    <Link href={routes.entries.create}>
+                        <FolderPlus />
+                        New entry
+                    </Link>
+                </Button>
             </div>
 
-            <h1>Group <em>{group.name}</em></h1>
+            {group.entries.length === 0 ? (
+                <EmptyState
+                    icon={ListPlus}
+                    title="This group is empty"
+                    description="Add existing entries to compare their progress here."
+                    action={
+                        <Button asChild>
+                            <Link href={routes.groups.edit(group.id)}>
+                                <ListPlus />
+                                Add entries
+                            </Link>
+                        </Button>
+                    }
+                />
+            ) : (
+                <div className="space-y-6">
+                    <div className="space-y-2.5">
+                        {group.entries.map((entry) => (
+                            <GroupEntryRow
+                                key={entry.id}
+                                entry={entry}
+                                removing={removingId === entry.id}
+                                onRemove={() => removeEntry(entry.id)}
+                            />
+                        ))}
+                    </div>
 
-            <div>
-                <table>
-                    <thead>
-                    <tr>
-                        <th>S/N</th>
-                        <th>Title</th>
-                        <th>Unit</th>
-                        <th>Completed</th>
-                        <th>Total</th>
-                        <th>Percentage</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {group.entries.map(({ id, title, completed, total, unit }, index) => (
-                        <tr key={id}>
-                            <th>{index + 1}</th>
-                            <td>{title}</td>
-                            <td>{unit}</td>
-                            <td>{completed}</td>
-                            <td>{total}</td>
-                            <td>
-                                {(completed / total * 100).toFixed(2)}%
-                                <progress value={completed} max={total}></progress>
-                            </td>
-                            <td>
-                                <div>
-                                    <Button asChild={true}>
-                                        <Link href={`/entries/${id}/edit`}>
-                                            <PencilIcon />
-                                            Edit
-                                        </Link>
-                                    </Button>
-                                    <Button variant="destructive" asChild={true}>
-                                        <Link method="delete" href={`/entries/${id}`}>
-                                            <TrashIcon />
-                                            Delete
-                                        </Link>
-                                    </Button>
-                                </div>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    )
+                    <ProgressComparison entries={group.entries} />
+                </div>
+            )}
+
+            <ConfirmDialog
+                open={deleteOpen}
+                onOpenChange={setDeleteOpen}
+                title={`Delete “${group.name}”?`}
+                description="The group will be deleted. Its entries and their progress stay exactly as they are."
+                confirmLabel="Delete group"
+                onConfirm={() => {
+                    router.delete(routes.groups.destroy(group.id), {
+                        onSuccess: () =>
+                            toast({ title: 'Group deleted' }),
+                    });
+                }}
+            />
+        </AppLayout>
+    );
 }
