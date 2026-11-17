@@ -1,14 +1,13 @@
-import type { ReactNode } from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { Link } from '@inertiajs/react';
+import type { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { navigate } from '@/lib/router';
-import type { Route } from '@/lib/router';
 import { cn } from 'cn';
 
 interface PageHeaderProps {
     title: string;
     description?: string;
-    backTo?: Route;
+    backHref?: string;
     actions?: ReactNode;
     className?: string;
 }
@@ -16,24 +15,25 @@ interface PageHeaderProps {
 export function PageHeader({
     title,
     description,
-    backTo,
+    backHref,
     actions,
     className,
 }: PageHeaderProps) {
     return (
-        <header className={cn('mb-5 flex items-start gap-2', className)}>
-            {backTo && (
+        <header className={cn('mb-6 flex items-start gap-2', className)}>
+            {backHref && (
                 <Button
-                    type="button"
+                    asChild
                     variant="ghost"
                     size="icon"
-                    aria-label="Go back"
                     className="-ml-2 shrink-0"
-                    onClick={() => navigate(backTo)}
                 >
-                    <ArrowLeft />
+                    <Link href={backHref} aria-label="Go back">
+                        <ArrowLeft />
+                    </Link>
                 </Button>
             )}
+
             <div className="min-w-0 flex-1">
                 <h1 className="text-2xl font-semibold tracking-tight break-words">
                     {title}
@@ -44,6 +44,7 @@ export function PageHeader({
                     </p>
                 )}
             </div>
+
             {actions && (
                 <div className="flex shrink-0 items-center gap-1">
                     {actions}
