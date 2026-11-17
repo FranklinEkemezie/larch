@@ -1,4 +1,4 @@
-Project Tracker
+Larch
 
 Product Requirements Document (PRD)
 
@@ -11,9 +11,9 @@ Data Storage: Local device storage
 
 1. Product Overview
 
-Project Tracker is a lightweight, personal progress-tracking application for monitoring progress across books, courses, learning materials, projects, and other activities that can be measured in units.
+Larch is a lightweight, personal progress-tracking application for monitoring progress across books, courses, learning materials, projects, and other activities that can be measured in units.
 
-The application allows users to organise tracked items into collections, record their progress, and visualise completion through simple analytics.
+The application allows users to organise tracked items into Groups, record their progress, and visualise completion through simple analytics.
 
 It is intended to replace a manually maintained Excel tracker with a more convenient, interactive and mobile-friendly experience.
 
@@ -25,7 +25,7 @@ Tracking progress across multiple books, courses, projects and study activities 
 
 A spreadsheet provides basic tracking capabilities but requires users to update values manually, offers limited interaction on mobile devices, and makes organising and comparing related activities less convenient.
 
-Project Tracker addresses this by providing a dedicated interface for managing entries, updating progress and monitoring completion across collections.
+Larch addresses this by providing a dedicated interface for managing entries, updating progress and monitoring completion across Groups.
 
 3. Product Goals
 
@@ -33,7 +33,7 @@ The application should:
 
 1. Make creating and managing tracked items straightforward.
 2. Allow users to update progress quickly and accurately.
-3. Provide flexible organisation through collections.
+3. Provide flexible organisation through Groups.
 4. Make progress easy to understand through visual indicators and simple analytics.
 5. Preserve user data locally without requiring an internet connection or remote account.
 6. Provide a clean, intuitive and responsive mobile experience.
@@ -77,9 +77,9 @@ It is a user-defined, free-form label rather than a fixed selection.
 
 Examples include Chapters, Pages, Hours, Lessons, Exercises and Features.
 
-4.3 Collection
+4.3 Group
 
-A Collection is a named grouping of entries.
+A Group is a named grouping of entries.
 
 Examples:
 
@@ -87,11 +87,11 @@ Examples:
 - C++ Learning Path
 - November Study Plan
 
-An entry may belong to multiple collections or none at all.
+An entry may belong to multiple Groups or none at all.
 
-Progress is maintained at the entry level, not independently within each collection. Consequently, updating an entry updates its progress wherever it appears.
+Progress is maintained at the entry level, not independently within each Group. Consequently, updating an entry updates its progress wherever it appears.
 
-Deleting a collection must not delete its entries. Deleting an entry removes it from all collections.
+Deleting a Group must not delete its entries. Deleting an entry removes it from all Groups.
 
 5. Functional Requirements
 
@@ -117,19 +117,19 @@ Each entry should display:
 - Completion percentage
 - Visual progress indicator
 
-5.2 Collection Management
+5.2 Group Management
 
 Users must be able to:
 
-- Create collections with a name.
-- View all collections.
-- Rename collections.
-- Delete collections.
-- Add existing entries to a collection.
-- Remove entries from a collection.
-- View the entries belonging to a collection.
+- Create Groups with a name.
+- View all Groups.
+- Rename Groups.
+- Delete Groups.
+- Add existing entries to a Group.
+- Remove entries from a Group.
+- View the entries belonging to a Group.
 
-An entry can appear in multiple collections without creating separate copies of its progress data.
+An entry can appear in multiple Groups without creating separate copies of its progress data.
 
 5.3 Progress Tracking
 
@@ -149,15 +149,15 @@ Progress percentages must be calculated from the entry's completed and total val
 
 The application should provide simple visual summaries of progress.
 
-For the MVP, collection analytics should include:
+For the MVP, Group analytics should include:
 
-- A horizontal bar chart comparing the completion percentages of entries in a collection.
+- A horizontal bar chart comparing the completion percentages of entries in a Group.
 - Clear identification of each entry.
 - Percentage labels and, where practical, completed/total counts.
 
 Percentages should be used for comparisons because entries may have different totals and measurement units.
 
-The MVP does not require an aggregate collection completion score.
+The MVP does not require an aggregate Group completion score.
 
 5.5 Home Screen and Navigation
 
@@ -166,9 +166,9 @@ The application must provide a home screen serving as the main entry point.
 It should provide convenient access to:
 
 - An overview of tracked entries.
-- Collections.
+- Groups.
 - Relevant progress summaries.
-- Common actions such as creating an entry or collection.
+- Common actions such as creating an entry or Group.
 
 Navigation should be straightforward and consistent across the application.
 
@@ -189,10 +189,10 @@ The application should support the following primary workflows:
 1. Create an entry: Open the entry creation interface, provide the required details and save.
 2. Manage an entry: Open an existing entry to view its details, edit its information or delete it.
 3. Update progress: Open an entry and increment, decrement or directly set its completed value.
-4. Create a collection: Create a named collection.
-5. Organise entries: Open a collection and add existing entries or remove entries from it.
-6. Review progress: Open a collection to view its entries and compare their completion percentages.
-7. Navigate the application: Move between the home screen, entries, collections and settings.
+4. Create a Group: Create a named Group.
+5. Organise entries: Open a Group and add existing entries or remove entries from it.
+6. Review progress: Open a Group to view its entries and compare their completion percentages.
+7. Navigate the application: Move between the home screen, entries, Groups and settings.
 
 8. User Interface and Visual Direction
 
@@ -232,19 +232,19 @@ Data must remain available across application restarts and must not be lost duri
 
 - Common interactions should feel immediate.
 - Progress updates should not require unnecessary page reloads.
-- The application should remain responsive as the number of entries and collections increases.
+- The application should remain responsive as the number of entries and Groups increases.
 
 8.4 Usability
 
 - The interface must be designed primarily for Android mobile devices.
 - Common operations should require minimal interaction.
 - Forms and controls should provide clear feedback and validation.
-- Empty states should guide users towards creating their first entry or collection.
+- Empty states should guide users towards creating their first entry or Group.
 
 8.5 Data Integrity
 
 - Progress values must always satisfy the defined constraints.
-- Collection membership must remain consistent when entries or collections are deleted.
+- Group membership must remain consistent when entries or Groups are deleted.
 - An entry's progress must remain consistent wherever that entry is displayed.
 
 9. MVP Scope
@@ -253,9 +253,9 @@ The initial release should include:
 
 - Entry creation, viewing, editing and deletion.
 - Progress tracking and updates.
-- Collection creation, editing and deletion.
-- Adding and removing entries from collections.
-- Progress indicators and simple collection analytics.
+- Group creation, editing and deletion.
+- Adding and removing entries from Groups.
+- Progress indicators and simple Group analytics.
 - Home screen and application navigation.
 - Light and dark themes.
 - Offline operation and persistent local storage.
@@ -285,18 +285,18 @@ The MVP will be considered functionally complete when the following conditions a
 1. Users can create, view, edit and delete entries.
 2. Users can update entry progress through incremental controls and direct value entry.
 3. Progress validation prevents invalid completed and total values.
-4. Users can create, rename and delete collections.
-5. Users can add existing entries to collections and remove them.
-6. Entries can belong to multiple collections without duplicating their progress data.
+4. Users can create, rename and delete Groups.
+5. Users can add existing entries to Groups and remove them.
+6. Entries can belong to multiple Groups without duplicating their progress data.
 7. Entry progress is reflected consistently across the application.
 8. Users can view progress counts, percentages and visual progress indicators.
-9. Collection analytics can compare the completion percentages of its entries.
+9. Group analytics can compare the completion percentages of its entries.
 10. The home screen provides access to the application's primary features.
 11. Light and dark appearance modes work correctly and persist across sessions.
 12. Application data persists across restarts and normal application updates.
 13. Core functionality works without an internet connection.
 
-The acceptance criteria represent the primary capabilities of the existing Excel-based tracker, improved with collection management, visual analytics and a dedicated mobile interface.
+The acceptance criteria represent the primary capabilities of the existing Excel-based tracker, improved with Group management, visual analytics and a dedicated mobile interface.
 
 ---
 
